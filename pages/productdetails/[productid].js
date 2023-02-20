@@ -7,9 +7,9 @@ const singleProduct = (data) => {
     const { productid } = router.query
     const allProducts = data.data
     const singleProduct = allProducts.find((res) => {
-        return res.id === parseInt(productid)
+        return res._id === productid
     })
-    console.log("single prod", singleProduct)
+    console.log("single prod",singleProduct)
     return (
         <>
 
@@ -20,7 +20,7 @@ const singleProduct = (data) => {
     )
 }
 export const getServerSideProps = async () => {
-    const { data } = await axios.get('https://fakestoreapi.com/products/')
+    const { data } = await axios.get('http://localhost:5000/admin/products')
     return {
         props: {
             data

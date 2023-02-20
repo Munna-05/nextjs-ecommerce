@@ -32,7 +32,7 @@ const Home = (data) => {
 }
 
 export const getStaticProps =async()=>{
-  const {data} = await axios.get('https://fakestoreapi.com/products/')
+  const {data} = await axios.get('http://localhost:5000/admin/products')
   return {
     props:{
       data

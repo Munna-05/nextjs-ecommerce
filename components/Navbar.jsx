@@ -1,8 +1,19 @@
-import React from 'react'
+'use client'
+import React, { useEffect, useState } from 'react'
 import Link from 'next/link'
-
+import axios from 'axios'
+// import baseUrl from '@/config'
 const Navbar = () => {
-    const categories = ['watches', 'shirts', 'tshirts', 'pants', 'shoes', 'sunglasses', 'jeans','cosmetics','perfumes','caps']
+    //get categories using useEffect
+    const [categories,setCategories] = useState([])
+    useEffect(()=>{
+        //get categories
+        axios.get(`http://localhost:5000/admin/categories`).then((res)=>{
+            console.log("________",res.data) 
+            setCategories(res.data)
+        }).catch(err=>console.log('err',err))
+    },[])
+
     return (
 
         <div>
@@ -10,7 +21,7 @@ const Navbar = () => {
                 <div class="container flex flex-wrap items-center justify-between mx-auto">
                     <Link href={'/'}>
                         <span class="flex items-center">
-                            <img src="https://flowbite.com/docs/images/logo.svg" class="h-6 mr-3 sm:h-9" alt="Flowbite Logo" />
+                            {/* <img src="https://flowbite.com/docs/images/logo.svg" class="h-6 mr-3 sm:h-9" alt="Flowbite Logo" /> */}
                             <span class="self-center text-xl font-semibold whitespace-nowrap dark:text-white">Ecom</span>
                         </span>
                     </Link>
