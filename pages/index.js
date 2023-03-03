@@ -6,6 +6,7 @@ import Layout from '@/components/Layout'
 import Coverpic from '@/components/Coverpic'
 import ProductSections from '@/components/ProductSections'
 import axios from 'axios'
+import { productionURL } from '@/config'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -26,7 +27,7 @@ const Home = (data) => {
 }
 
 export const getStaticProps =async()=>{
-  const {data} = await axios.get('http://localhost:5000/admin/products')
+  const {data} = await axios.get(`${productionURL}/admin/products`)
   return {
     props:{
       data

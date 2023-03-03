@@ -1,4 +1,5 @@
 import ProductDetails from "@/components/ProductDetails"
+import { productionURL } from "@/config"
 import axios from "axios"
 import { useRouter } from "next/router"
 
@@ -20,7 +21,7 @@ const singleProduct = (data) => {
     )
 }
 export const getServerSideProps = async () => {
-    const { data } = await axios.get('http://localhost:5000/admin/products')
+    const { data } = await axios.get(`${productionURL}/admin/products`)
     return {
         props: {
             data
