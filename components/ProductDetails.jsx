@@ -1,16 +1,109 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import FormData from 'form-data';
+import moment from 'moment'
+
+import axios from 'axios';
 
 const ProductDetails = ({ productDetails }) => {
+    const [orderCreating, setOrderCreating] = React.useState(false)
+    var state_arr = ["Andaman & Nicobar", "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chandigarh", "Chhattisgarh", "Dadra & Nagar Haveli", "Daman & Diu", "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jammu & Kashmir", "Jharkhand", "Karnataka", "Kerala", "Lakshadweep", "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland", "Orissa", "Pondicherry", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Tripura", "Uttar Pradesh", "Uttaranchal", "West Bengal"];
+
+
+    const [postOfficeDetails, setPostOfficeDetails] = useState({})
+    const [Name, setName] = useState('')
+    const [Address, setAddress] = useState('')
+    const [Email, setEmail] = useState('')
+    const [Pincode, setPincode] = useState('')
+    const [District, setDistrict] = useState('')
+    const [State, setState] = useState('')
+    const [Town, setTown] = useState('')
+    const [Phone, setPhone] = useState()
+    const [Error, setError] = useState(false)
+
+    const data = {
+        customerName: Name,
+        customerAddress: Address,
+        customerEmail: Email,
+        customerDistrict: District,
+        customerState: State,
+        customerTown: Town,
+        customerPincode: parseInt(Pincode),
+        productId: productDetails._id,
+        quantity: 1,
+        customerPhone: parseInt(Phone),
+        dateOfOrder: moment(Date.now()).format('ll'),
+        orderStatus: 'placed',
+        paymentType: ''
+
+    }
+
+    //////validation 
+
+    const validate = () => {
+        if (!Name) {
+            setError(true)
+        } else if (!Email) {
+            setError(true)
+        } else if (!Address) {
+            setError(true)
+        } else if (!Pincode) {
+            setError(true)
+        } else if (!Phone) {
+            setError(true)
+        } else {
+            return true
+        }
+
+    }
+
+    const handlePincode = (e) => {
+        if (e.target.value.length == 6) {
+            setPincode(e.target.value)
+            console.log('api called')
+            axios.get(`https://api.postalpincode.in/pincode/${e.target.value}`).then((res) => {
+                setPostOfficeDetails(res.data[0].PostOffice[0])
+                setDistrict(res.data[0].PostOffice[0].District)
+                setState(res.data[0].PostOffice[0].State)
+                setTown(res.data[0].PostOffice[0].Name)
+                console.log(res.data[0].PostOffice[0])
+            })
+        }
+    }
+
+    const createOrder = () => {
+
+        setOrderCreating(!orderCreating)
+
+    }
+    const closeBox = () => {
+        setOrderCreating(false)
+        setError(false)
+    }
+
+
+    const handleOrder = () => {
+        if (validate()) {
+            axios.post(`http://localhost:5000/order`, data).then((res) => {
+                console.log(res)
+            }).catch(err => console.log(err))
+        }
+    }
     return (
-        <div className='h-screen border '>
+        <div className='h-screen border overflow-y-hidden  '>
 
 
-            <section class="text-gray-700 body-font overflow-hidden mt-10 bg-white">
-                <div class="container px-5 py-24 mx-auto">
-                    <div class="lg:w-4/5 mx-auto flex flex-wrap items-center">
-                        <img alt="ecommerce" class="lg:w-1/2 w-full object-cover object-center rounded px-8" src={productDetails.productImage} />
+            <section class={`text-gray-700 body-font ${orderCreating ? 'blur-sm brightness-75' : null} h-screen transition duration-300 overflow-hidden  bg-stone-300`}>
+                <div class="container  border-x bg-white px-5 mt-16 py-24 mx-auto">
+                    <div class="lg:w-full mx-auto flex h-full items-center">
+
+                        <div className='lg:w-1/2 w-full h-full flex justify-center'>
+                            <img alt="ecommerce" class="lg:w-2/3 w-full  object-cover object-center rounded " src={productDetails.productImage} />
+
+                        </div>
+
                         <div class="lg:w-1/2 w-full lg:pl-10 lg:py-6 mt-6 lg:mt-0  ">
-                            <h2 class="text-sm title-font text-gray-500 tracking-widest">BRAND NAME</h2>
+                            {/* <h2 class="text-xs title-font text-gray-500 tracking-widest">BRAND NAME</h2> */}
                             <h1 class="text-gray-900 text-3xl title-font font-medium mb-1">{productDetails.productName}</h1>
                             <div class="flex mb-4">
                                 {/* <span class="flex items-center">
@@ -82,11 +175,86 @@ const ProductDetails = ({ productDetails }) => {
                                     </svg>
                                 </button> */}
                             </div>
-                                <div class="flex  mt-4  text-white bg-stone-700 border-0 py-2 px-6 focus:outline-none hover:bg-teal-700 cursor-pointer w-full justify-center">Buy Now</div>
+                            <div onClick={createOrder} class="flex  mt-4  text-white bg-stone-700 border-0 py-2 px-6  focus:outline-none hover:bg-teal-700 cursor-pointer w-96 justify-center">
+                                <span>Order Now</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </section>
+
+            {orderCreating ? <>
+
+                <AnimatePresence>
+
+                    <motion.div initial={{ y: 1000, scale: 0 }} animate={{ scale: 1, y: orderCreating ? -1000 : 1000, transition: { duration: 0.5, type: 'spring' } }} className='w-full
+                    
+                    '>
+
+                        {/* order details */}
+
+
+                        <div className=''>
+                            {/* <div className='flex justify-center py-4 text-2xl bg-white w-2/3 mx-auto font-normal'>Enter Order Details</div> */}
+
+                            <div className=' bg-white  flex items-center mx-auto w-3/4  '>
+
+                                <div className=' bg-white w-3/4 px-3'>
+                                    <img alt="ecommerce" class="w-80 h-80 mx-auto w-full object-cover object-center rounded px-8" src={productDetails.productImage} />
+                                    <h1 class="text-gray-900 text-1xl text-center title-font font-medium my-3">{productDetails.productName} : ${productDetails.productPrice}</h1>
+
+
+                                </div>
+                                <div className=' '>
+
+                                    <div className='flex justify-end p-2'>
+                                        <button onClick={() => closeBox()}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+
+                                    </div>
+
+                                    <div className='p-2 text-sm gap-2 m-2'>
+                                        <div className='flex justify-center mb-2 text-stone-700 text-2xl font-extralight'>Enter Order Details</div>
+
+                                        {Error && !Name ? <span className='text-red-500  text-xs'>Enter Name</span> : null}
+                                        <input required type="text" onChange={(e) => setName(e.target.value)} placeholder='Name' className={`h-10 w-full border ${Error && !Name ? "border-red-600 border-1 " : null} px-3 my-1`} />
+                                        {Error && !Email ? <span className='text-red-500  text-xs'>Enter Email</span> : null}
+                                        <input required type="text" onChange={(e) => setEmail(e.target.value)} placeholder='Enter Email' className={`h-10 w-full border ${Error && !Email ? "border-red-600 border-1" : null} px-3 my-1`} />
+                                        {Error && !Address ? <span className='text-red-500  text-xs'>Enter Address</span> : null}
+                                        <input required type="text" placeholder='Address' onChange={(e) => setAddress(e.target.value)} className={`h-20 w-full border ${Error && !Address ? "border-red-600 border-1" : null} px-3 my-1`} />
+                                        {Error && !Pincode ? <span className='text-red-500  text-xs'>Enter Pincode</span> : null}
+                                        <input required onChange={(e) => handlePincode(e)} type="text" placeholder='Pincode' className={`h-10 w-full border ${Error && !Pincode ? "border-red-600 border-1 " : null} px-3 my-1`} />
+
+                                        <input required type="text" placeholder='District' value={District} className={`h-10 w-full border ${Error && !District ? "border-red-600 border-1 " : null} px-3 my-1`} />
+
+                                        <input required type="text" placeholder='State' value={State} className={`h-10 w-full border ${Error && !State ? "border-red-600 border-1 " : null} px-3 my-1`} />
+                                        {/* <select className={`h-10 w-full border ${Error && !Name ?"border-red-600 border-1 ":null} px-3 my-1`}>
+                                        {state_arr.map(res=>{
+                                          return <option value={res}>{res}</option>
+                                             
+
+                                        })}
+                                        
+                                    </select> */}
+                                        <input required type="text" placeholder='Town' value={Town} className={`h-10 w-full border ${Error && !Town ? "border-red-600 border-1 " : null} px-3 my-1`} />
+                                        {Error && !Phone ? <span className='text-red-500  text-xs'>Enter Phone Number</span> : null}
+
+                                        <input required type="text" placeholder='Phone Number' onChange={(e) => setPhone(e.target.value)} value={Phone} className={`h-10 w-full border ${Error && !Phone ? "border-red-600 border-1 " : null} px-3 my-1`} />
+                                    </div>
+                                    <div className='flex justify-end'> <button onClick={handleOrder} className='px-8 py-3 text-xs text-white hover:bg-teal-700 mt-5 bg-stone-500'>Pay Now</button></div>
+                                </div>
+                            </div>
+                        </div>
+                    </motion.div>
+                </AnimatePresence>
+
+            </> : null}
+
+
+
 
 
         </div>
